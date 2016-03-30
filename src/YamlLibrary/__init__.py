@@ -2,8 +2,6 @@
 
 from fetchyaml import FetchYaml
 
-__version__ = '0.1'
-
 class YamlLibrary(FetchYaml):
     """
     TO BE DEFINED

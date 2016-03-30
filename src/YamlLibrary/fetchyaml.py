@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-import sys
 import yaml
-import os.path
-from robot.api import logger
 import re
+from robot.api import logger
 
 
 class FetchYaml(object):
@@ -55,7 +53,8 @@ class FetchYaml(object):
         src = self._get_tree_by_smart_path(dct, yml_path)
         dst = yaml.load(yml_doc_matcher)
         if not self.compare_tree(src, dst):
-            raise AssertionError("nodes under '%s' not satisfied matcher '%s'" % (yml_path, yml_doc_matcher))
+            raise AssertionError("nodes under '%s' do not satisfied matcher:\nactual:\n'%s'\nmatcher:\n'%s'" %
+                                 (yml_path, str(src), yml_doc_matcher))
 
     @staticmethod
     def _tokenize(s):

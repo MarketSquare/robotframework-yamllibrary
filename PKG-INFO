@@ -1,10 +1,10 @@
 Metadata-Version: 1.0
 Name: robotframework-yamllibrary
-Version: 0.1
+Version: 0.1.2
 Summary: Yaml utility library for Robot Framework
 Home-page: https://github.com/divfor/robotframework-yamllibrary
 Author: Fred Huang
 Author-email: divfor@gmail.com
-License: UNKNOWN
-Description: UNKNOWN
-Platform: UNKNOWN
+License: Apache V2.0
+Description: N/A
+Platform: Linux, Windows and Mac
