@@ -1,10 +1,12 @@
 # robotframework-yamllibrary
 安装：
-拷贝到Lib/site-packages下（windows），或者创建link到dist-packages/下（linux）
+方法1：联网，sudo pip install robotframework-yamllibrary;
+方法2：从github这里，或者从pypi.python.org/pypi/robotframework-yamllibrary下面下载tar包，然后sudo pip install tar包;
+方法3：下载并解压tar包，拷贝YamlLibrary目录到Lib/site-packages下（windows），或到dist-packages/下（linux）。Linux下也可以不实际拷贝，创建link即可;
 
-使用库：Robot里直接装载YamlLibrary库名字
+使用：Robot/RIDE里直接装载，以YamlLibrary作为库名字
 
-关键字以及举例:
+关键字举例:
 ```robotframework
 ${a}	Get Tree	${yaml_string}	icmp.types%type=5%rate_limit.pps
 ${b}	Get Tree	${yaml_string}	bpf%name~^2[0-9]{7}_[0-9a-f]{32}%ratelimit.pps
@@ -13,9 +15,9 @@ Nodes Should Match	${yml_string}	bpf/action=ratelimit/name	~^2[0-9]{7}_[0-9a-f]{
 ```
 
 说明：
-读取数据库或者web接口测试得到json或者yaml文档（参数1），然后可以用上面两个关键字读取路径（参数2）下的子文档/值，以及对值进行比较（参数3）。值比较的方式有相等=，正则表达式匹配～，和数学表达式（不等式）。全部比较成功才会返回True，否则False。
+基本思想是按文档树的路径取值，或对值做比较。树的路径以字典的键组成，上下级之间用小数点分割，对于键相同的数组元素，以数组下标（从0开始）取代键。比如 student.grades.2.classes.0.wangdan.age就是一个路径, 表明三年纪一班王丹的年龄. 如要智能找出数组下标，可以使用path_left/sub_path=xxx/path_right匹配法下沉到其子元素定位出，需要：用//插入一段子路径（相对path_left路径，两头不加小数点），一个匹配符号（=表示需相等，~表示需正则匹配），一个值串。这三个部分匹配得到的数组项应该是唯一的（由使用者写好这三部分确保这个唯一性）。注意：路径匹配不可以用数学表达，而值比较可以。
 
-路径以小数点分割，碰到数组元素则用数字下标（从0开始）。
-对于有多个同级的元素形成的列表，需要确定数组下标，这里采取下沉到其子元素定位的办法：用/或者%分割的一段子路径（相对路径，小数点分割），一个=或～符号，一个比较值，这三个部分匹配得到所在数组的下标应该是唯一的（由使用者写好这三部分确保这个唯一性）。注意路径比较的时候是不可以用数学表达式
+使用的时候，先读取数据库或者web接口测试得到json或者yaml文档到内存（python字典或者list），当作参数1。然后可以用上面两个关键字找出指定路径下（参数2）的子文档或者节点值（节点算是一个单node的文档），以更进一步对值进行比较（参数3）。值比较的方式有相等=，正则表达式匹配～，和数学表达式（不等式）。全部比较成功才会返回True，否则False。
+
 
 Debug：Set Log Level为Debug可以得到带debug的log，展开就可以看到出错的地方
