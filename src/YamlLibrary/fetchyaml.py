@@ -12,20 +12,9 @@ class FetchYaml(object):
     def __init__(self):
         pass
 
-    def get_tree(self, yml_string, key):
+    def get_tree(self, yml_src, key):
         """return a python dictionary with subset of data filter by 'key'"""
-        if isinstance(yml_string, basestring):
-            try:
-                dct = yaml.load(yml_string)
-            except:
-                raise ("can not do yaml load: %s" % yml_string)
-        elif isinstance(yml_string, (dict, list)):
-            try:
-                dct = yaml.load(yaml.dump(yml_string))
-            except:
-                raise ("Can not convert to yaml data format: %s" % str(yml_string))
-        else:
-            raise ("Unknown format to yaml: %s" % str(yml_string))
+        dct = self._smart_load(yml_src)
         return self._get_tree_by_smart_path(dct, key)
 
     def compare_tree(self, src, dst):
@@ -49,12 +38,28 @@ class FetchYaml(object):
         return False
 
     def nodes_should_match(self, yml_doc_data, yml_path, yml_doc_matcher):
-        dct = yaml.load(yml_doc_data)
+        dct = self._smart_load(yml_doc_data)
         src = self._get_tree_by_smart_path(dct, yml_path)
-        dst = yaml.load(yml_doc_matcher)
+        dst = self._smart_load(yml_doc_matcher)
         if not self.compare_tree(src, dst):
             raise AssertionError("nodes under '%s' do not satisfied matcher:\nactual:\n'%s'\nmatcher:\n'%s'" %
                                  (yml_path, str(src), yml_doc_matcher))
+
+    @staticmethod
+    def _smart_load(src):
+        if isinstance(src, basestring):
+            try:
+                dct = yaml.load(src)
+            except:
+                raise ("can not do yaml load: %s" % src)
+        elif isinstance(src, (dict, list)):
+            try:
+                dct = yaml.load(yaml.dump(src))
+            except:
+                raise ("Can not convert to yaml data format: %s" % str(src))
+        else:
+            raise ("Unknown format to yaml: %s" % str(src))
+        return dct
 
     @staticmethod
     def _tokenize(s):
