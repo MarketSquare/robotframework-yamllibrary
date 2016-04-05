@@ -2,6 +2,7 @@
 
 from fetchyaml import FetchYaml
 
+
 class YamlLibrary(FetchYaml):
     """
     TO BE DEFINED
