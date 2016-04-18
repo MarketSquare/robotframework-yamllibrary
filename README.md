@@ -23,4 +23,4 @@ Nodes Should Match	${yml_string}	bpf/action=ratelimit/2
 路径以小数点分割，碰到数组元素则用数字下标（从0开始）。
 对于有多个同级的元素形成的列表，需要确定数组下标，这里采取下沉到其子元素定位的办法：用/或者%分割的一段子路径（相对路径，小数点分割），一个=或～符号，一个比较值，这三个部分匹配得到所在数组的下标应该是唯一的（由使用者写好这三部分确保这个唯一性）。注意路径比较的时候是不可以用数学表达式
 
-Debug：Set Log Level为Debug可以得到带debug的log，展开就可以看到出错的地方
+Debug：此库调用了robotframework的logger，Set Log Level为Debug可以得到带debug的log，展开就可以看到出错的地方
