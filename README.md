@@ -1,10 +1,9 @@
 如果你需要使用树型的json或者yaml字符串而不是字典，比如读取或者定义大量变量，一次性比较很多变量等，YamlLibrary是一个好的选择。 Get Tree接受一个字符串和一个路径作为参数，将字符串转成yaml树（注意json是yaml的子集，所以也可以用）然后返回给定路径下的子树（注意节点值是最小的子树，所以可以用来取节点值）。Node should Match则在Get Tree的基础上增加一个动作：将取出来的子树跟第三个参数--一个描述比较期望值的子树，一次性完成全部比较。
 
-# robotframework-yamllibrary
 安装：
-拷贝到Lib/site-packages下（windows），或者创建link到dist-packages/下（linux）
+pip install robotframework-yamllibrary
 
-使用库：Robot里直接装载YamlLibrary库名字
+使用库：Robotframework: Library   YamlLibrary
 
 关键字举例:
 ```robotframework
