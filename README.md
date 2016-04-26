@@ -4,16 +4,30 @@
 pip install robotframework-yamllibrary
 
 使用库：Robotframework: Library   YamlLibrary
+假如有两个yaml串，一个是数据，另一个做比较器用于检查部分路径上的值：
+```python
+yaml_string = {
+  Employer: {
+    Name: Microsoft,
+    Office: { China: [ Beijing, Shanghai ], UK: [ London ] },
+    Staff : [ { ID: 001, name: Fred, age: 30 }, { ID: 102, name: Jenny, age: 21 } ],
+  },
+  School: { middle: xxx_school, high_school: zzz_school, colleage_school: sss_school },
+}
+cmp_string = { Employer: { Staff : [ { ID: y > 100, name: Jenny, age: 16 < y < 50 } ] } }
 
-关键字举例:
+```
+
+关键字使用举例:
 ```robotframework
-${a}	Get Tree	${yaml_string}	icmp.types.0.rate_limit.pps
-${a}	Get Tree	${yaml_string}	icmp.types/type=5/rate_limit.pps
-${b}	Get Tree	${yaml_string}	bpf.2.ratelimit.pps
-${b}	Get Tree	${yaml_string}	bpf/user.name~^2[0-9]{7}_[0-9a-f]{32}/ratelimit.pps
-Nodes Should Match	${yml_string}	bpf/action=ratelimit/ratelimit.pps	112001 > y >= 112000
-Nodes Should Match	${yml_string}	bpf/action=ratelimit/user.name~^2[0-9]{7}_[0-9a-f]{32}$
-Nodes Should Match	${yml_string}	bpf/action=ratelimit/2
+${company}= | Get Tree | ${yaml_string} | Employer.Name
+${staff_list}=	| Get Tree | ${yaml_string} | Employer.Staff
+${education_schools} = | Get Tree | ${yaml_string} | School
+${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff.0.age
+${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff/name=Fred/age
+${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff/name~^Fred$/age
+Nodes Should Match |	${yml_string}	| Employer.Staff/name~^Fred$/age | 16 < y < 60
+Nodes Should Match |	${yml_string}	| . | { Employer: { Staff : [ { ID: y > 100, name: Jenny, age: 16 < y < 50 } ] } }
 ```
 
 说明：
