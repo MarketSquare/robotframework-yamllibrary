@@ -20,7 +20,7 @@ yaml_string = {
   },
   School: { middle: xxx_school, high_school: zzz_school, colleage_school: sss_school },
 }
-cmp_string = { Employer: { Staff : [ { ID: y > 100, name: Jenny, age: 16 < y < 50 } ] } }
+cmp_string = { Employer: { Staff : [ { name: Fred, ID: y < 100, age: 16 < y < 50 } ] } }
 
 ```
 
