@@ -222,12 +222,15 @@ class FetchYaml(object):
         return True
 
     def _cmp_list(self, src, dst):
-        if not isinstance(dst, (tuple,list)):
-            logger.debug("_cmp_list: '%s' is not a list or tuple" % str(dst))
+        if not isinstance(src, (tuple,list)):
+            logger.debug("_cmp_list: src '%s' is not a list or tuple" % str(src))
             return False
         try:
-            for i in range(len(dst)):
-                if not self.compare_tree(src[i], dst[i]):
+            for v in dst:
+                if isinstance(v, (basestring, int, long, float, bool)):
+                    if v not in src:
+                        return False
+                elif all([not self.compare_tree(s, v) for s in src]):
                     return False
         except IndexError:
             logger.debug("_cmp_list: matcher index '%s' out of range in list '%s'" % (str(key), str(src)))
