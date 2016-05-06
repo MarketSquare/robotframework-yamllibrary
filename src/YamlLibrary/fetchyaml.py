@@ -10,7 +10,7 @@ class FetchYaml(object):
     it requires string buffer input that can be loaded by yaml.load() function
     """
     def __init__(self):
-        pass
+        self._mathexpr = re.compile("^[y>=< 0-9]+$")
 
     def get_tree(self, yml_src, path):
         """travel given 'path' in src to return a sub-tree that may
@@ -40,7 +40,7 @@ class FetchYaml(object):
             return self._cmp_bool(src, dst)
         elif dst is None:
             return self._cmp_null(src, dst)
-        elif isinstance(dst, basestring) and re.compile("^[y>=< 0-9]+$").search(dst) and len(dst.split('y')) > 1:
+        elif isinstance(dst, basestring) and self._mathexpr.search(dst) and len(dst.split('y')) > 1:
             logger.debug("compare_tree: eval '%s' with %s instead of y" % (str(dst), str(src)))
             return self._eval_math_expr(src, dst)
         elif isinstance(dst, basestring):
@@ -167,7 +167,7 @@ class FetchYaml(object):
 
     @staticmethod
     def _cmp_number(src, dst):
-        for t in (int, long, float, bool):
+        for t in (int, long, float):
             if isinstance(dst, t):
                 try:
                     if t(src) == t(dst):
@@ -192,9 +192,11 @@ class FetchYaml(object):
     def _cmp_null(src, dst):
         if src is None:
             return True
-        if isinstance(src, basestring) and src in ('null', 'undefined'):
+        if isinstance(src, basestring) and src in ('', 'null', 'undefined'):
             return True
-        logger.debug("_cmp_null: src=%s not equal to matcher=%s" % (str(src), str(dst)))
+        if isinstance(src, (list, tuple, dict)) and len(src) == 0:
+            return True
+        logger.debug("_cmp_null: src=[%s] does not matches None" % str(src))
         return False
 
     @staticmethod
@@ -209,8 +211,8 @@ class FetchYaml(object):
         return False
 
     def _cmp_dict(self, src, dst):
-        if not isinstance(dst, dict):
-            logger.debug("_cmp_dict: '%s' is not a dict" % str(dst))
+        if not isinstance(src, dict):
+            logger.debug("_cmp_dict: src tree '%s' is not a dict" % str(src))
             return False
         try:
             for key in dst.keys():
@@ -230,7 +232,7 @@ class FetchYaml(object):
                 if isinstance(v, (basestring, int, long, float, bool)):
                     if v not in src:
                         return False
-                elif all([not self.compare_tree(s, v) for s in src]):
+                elif all([ not self.compare_tree(s, v) for s in src ]):
                     return False
         except IndexError:
             logger.debug("_cmp_list: matcher index '%s' out of range in list '%s'" % (str(key), str(src)))
