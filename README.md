@@ -1,8 +1,8 @@
 功能简述：
 
-1. 读取json或者yaml，根据路径返回叶子节点的值或者一个子树，对于列表可以支持分支路径匹配定位
+1. 读取json或者yaml，根据路径返回叶子节点的值或者一个子树，路径下探的时候碰到列表用列表下标数字代替key，数字从0开始，不容易确定的时候可以插入列表分支路径匹配串去自动寻找下标值
 
-2. 按相等/正则/数学不等式方式比较一个叶子节点的值或者子树部分或全部值
+2. 对上面返回的子树，给出一个比较树(最小为单个值)，按相等/正则/数学不等式方式比较子树上叶子节点的值，子树的部分或全部结构的键和值。遇到列表则支持乱序比较。
 
 如果你需要使用树型的json或者yaml字符串而不是字典，比如读取或者定义大量变量，一次性比较很多变量等，YamlLibrary是一个好的选择。 Get Tree接受一个字符串和一个路径作为参数，将字符串转成yaml树（注意json是yaml的子集，所以也可以用）然后返回给定路径下的子树（注意节点值是最小的子树，所以可以用来取节点值）。Node should Match则在Get Tree的基础上增加一个动作：将取出来的子树跟第三个参数--一个描述比较期望值的子树，一次性完成全部比较。
 
@@ -20,7 +20,8 @@ yaml_string = {
   },
   School: { middle: xxx_school, high_school: zzz_school, colleage_school: sss_school },
 }
-cmp_string = { Employer: { Staff : [ { name: Fred, ID: y < 100, age: 16 < y < 50 } ] } }
+# define a matcher string to compare some tree/sub-tree structure
+cmp_string = { Employer: { Staff : [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ] } }
 
 ```
 
