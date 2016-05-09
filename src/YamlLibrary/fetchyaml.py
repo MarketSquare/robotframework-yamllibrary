@@ -30,21 +30,17 @@ class FetchYaml(object):
         
         return: True or False
         """
-        if isinstance(dst, dict):
-            return self._cmp_dict(src, dst)
+        if dst is None or len(dst) == 0:
+            return self._cmp_null(src, dst)
         elif isinstance(dst, (list, tuple)):
             return self._cmp_list(src, dst)
-        elif isinstance(dst, (int, long, float)):
-            return self._cmp_number(src, dst)
-        elif isinstance(dst, bool):
-            return self._cmp_bool(src, dst)
-        elif dst is None:
-            return self._cmp_null(src, dst)
+        elif isinstance(dst, dict):
+            return self._cmp_dict(src, dst)
         elif isinstance(dst, basestring) and self._mathexpr.search(dst) and len(dst.split('y')) > 1:
             logger.debug("compare_tree: eval '%s' with %s instead of y" % (str(dst), str(src)))
             return self._eval_math_expr(src, dst)
-        elif isinstance(dst, basestring):
-            return self._cmp_string(src, dst)
+        elif isinstance(dst, (basestring, bool, int, long, float)):
+            return self._cmp_base_types(src, dst)
         logger.debug("compare_tree: src not in [dict, list, basestring, int, long, float, bool]:\n%s" % str(src))
         return False
 
@@ -155,14 +151,14 @@ class FetchYaml(object):
         if dst[0] != '~':
             if len(src) == len(dst) and unicode(src) == unicode(dst):
                 return True
-            logger.debug("_cmp_string: string not equal: (%s) != (%s)" % (src, dst))
         if dst[0] == '~':
             if len(dst) < 2:
                 logger.debug("_cmp_string: regexp is empty!")
                 return False
             if re.compile(dst[1:]).search(src):
+                logger.debug("_cmp_string: src '%s' matches regexp '%s'" % (str(src), str(dst)))
                 return True
-            logger.debug("_cmp_string: string not match: %s ~ %s" % (src, dst))
+            logger.debug("_cmp_string: string not match regexp: %s ~ %s" % (src, dst))
         return False
 
     @staticmethod
@@ -189,7 +185,7 @@ class FetchYaml(object):
         return False
 
     @staticmethod
-    def _cmp_null(src, dst):
+    def _cmp_null(src, dst=None):
         if src is None:
             return True
         if isinstance(src, basestring) and src in ('', 'null', 'undefined'):
@@ -224,20 +220,36 @@ class FetchYaml(object):
         return True
 
     def _cmp_list(self, src, dst):
-        if not isinstance(src, (tuple,list)):
+        if not isinstance(src, (tuple, list)):
             logger.debug("_cmp_list: src '%s' is not a list or tuple" % str(src))
             return False
         try:
             for v in dst:
-                if isinstance(v, (basestring, int, long, float, bool)):
-                    if v not in src:
+                if v is None or isinstance(v, (basestring, int, long, float, bool)):
+                    if all([not self._cmp_base_types(s, v) for s in src]):
+                        logger.debug("_cmp_list: '%s' from '%s' not match any value in list '%s'"
+                                     % (str(v), str(dst), str(src)))
                         return False
-                elif all([ not self.compare_tree(s, v) for s in src ]):
+                elif all([not self.compare_tree(s, v) for s in src]):
+                    logger.debug("_cmp_list: item '%s' from '%s' not found in src list '%s'"
+                                 % (str(v), str(dst), str(src)))
                     return False
         except IndexError:
             logger.debug("_cmp_list: matcher index '%s' out of range in list '%s'" % (str(key), str(src)))
             return False
+        logger.debug("_cmp_list: src '%s' matches '%s'" % (str(src), str(dst)))
         return True
+
+    def _cmp_base_types(self, src, dst):
+        if dst is None:
+            return self._cmp_null(src, dst)
+        if isinstance(dst, bool):
+            return self._cmp_bool(src, dst)
+        elif isinstance(dst, (int, long, float)):
+            return self._cmp_number(src, dst)
+        elif isinstance(dst, basestring):
+            return self._cmp_string(src, dst)
+        logger.debug("Unknown type of dst: %s" % str(dst))
 
     def _get_tree_by_direct_path(self, dct, key):
         key = iter(key)
