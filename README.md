@@ -21,8 +21,9 @@ yaml_string = {
   School: { middle: xxx_school, high_school: zzz_school, colleage_school: sss_school },
 }
 # define a matcher string to compare some tree/sub-tree structure
-cmp_string = { Employer: { Staff : [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ] } }
-cmp_subtree_string = [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ]
+cmp_all = { Employer: { Staff : [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ] } }
+cmp_sub_tree = { China: [ Beijing, Shanghai ], UK: [ London ] }
+cmp_list_items = [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ]
 
 ```
 
@@ -35,7 +36,9 @@ ${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff.0.age
 ${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff/name=Fred/age
 ${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff/name~^Fred$/age
 Nodes Should Match |	${yml_string}	| Employer.Staff/name~^Fred$/age | 16 < y < 60
-Nodes Should Match |	${yml_string}	| Employer.Staff | ${cmp_subtree_string}
+Nodes Should Match |	${yml_string}	| . | ${cmp_all}
+Nodes Should Match |	${yml_string}	| Employer.Office | ${cmp_sub_tree}
+Nodes Should Match |	${yml_string}	| Employer.Staff | ${cmp_list_items}
 ```
 
 说明：
