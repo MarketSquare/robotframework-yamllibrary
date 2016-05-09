@@ -22,6 +22,7 @@ yaml_string = {
 }
 # define a matcher string to compare some tree/sub-tree structure
 cmp_string = { Employer: { Staff : [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ] } }
+cmp_subtree_string = [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ]
 
 ```
 
@@ -34,7 +35,7 @@ ${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff.0.age
 ${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff/name=Fred/age
 ${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff/name~^Fred$/age
 Nodes Should Match |	${yml_string}	| Employer.Staff/name~^Fred$/age | 16 < y < 60
-Nodes Should Match |	${yml_string}	| . | ${cmp_string}
+Nodes Should Match |	${yml_string}	| Employer.Staff | ${cmp_subtree_string}
 ```
 
 说明：
