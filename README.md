@@ -20,10 +20,10 @@ yaml_string = {
   },
   School: { middle: xxx_school, high_school: zzz_school, colleage_school: sss_school },
 }
-# define a matcher string to compare some tree/sub-tree structure
-cmp_full_path = { Employer: { Staff : [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ] } }
-cmp_sub_tree = { China: [ Beijing, Shanghai ], UK: [ London ] }
-cmp_list_items = [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ]
+# define a matcher string to compare some parts of tree structure
+cmp_from_top_path = { Employer: { Staff : [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ] } }
+cmp_from_sub_path = { China: [ Beijing, Shanghai ], UK: [ London ] }
+cmp_some_list_items = [ { name: Jenny, ID: y > 100, age: 16 < y < 50 } ]
 
 ```
 
@@ -36,9 +36,9 @@ ${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff.0.age
 ${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff/name=Fred/age
 ${fred_age}= | Get Tree | ${yaml_string} | Employer.Staff/name~^Fred$/age
 Nodes Should Match |	${yml_string}	| Employer.Staff/name~^Fred$/age | 16 < y < 60
-Nodes Should Match |	${yml_string}	| . | ${cmp_full_path}
-Nodes Should Match |	${yml_string}	| Employer.Office | ${cmp_sub_tree}
-Nodes Should Match |	${yml_string}	| Employer.Staff | ${cmp_list_items}
+Nodes Should Match |	${yml_string}	| . | ${cmp_from_top_path}
+Nodes Should Match |	${yml_string}	| Employer.Office | ${cmp_from_sub_path}
+Nodes Should Match |	${yml_string}	| Employer.Staff | ${cmp_some_list_items}
 ```
 
 说明：
