@@ -30,7 +30,7 @@ class FetchYaml(object):
         
         return: True or False
         """
-        if dst is None or len(dst) == 0:
+        if dst is None or (isinstance(dst, (list, tuple, dict, basestring)) and len(dst) == 0):
             return self._cmp_null(src, dst)
         elif isinstance(dst, (list, tuple)):
             return self._cmp_list(src, dst)
@@ -71,7 +71,7 @@ class FetchYaml(object):
             try:
                 dct = yaml.load(src)
             except:
-                raise ValueError("_smart_load: can not do yaml load: %s (type is %s)" % (str(src), str(type(src))))
+                raise ValueError("_smart_load: yaml failed to load (%s) '%s'" % (str(type(src)), str(src)))
         elif isinstance(src, (dict, list)):
             try:
                 dct = yaml.load(yaml.dump(src))
@@ -190,7 +190,7 @@ class FetchYaml(object):
             return True
         if isinstance(src, basestring) and src in ('', 'null', 'undefined'):
             return True
-        if isinstance(src, (list, tuple, dict)) and len(src) == 0:
+        if isinstance(src, (list, tuple, dict, basestring)) and len(src) == 0:
             return True
         logger.debug("_cmp_null: src=[%s] does not matches None" % str(src))
         return False
