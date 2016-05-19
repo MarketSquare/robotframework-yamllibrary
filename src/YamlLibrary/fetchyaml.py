@@ -65,21 +65,16 @@ class FetchYaml(object):
 
     @staticmethod
     def _smart_load(src):
-        if isinstance(src, (int, long, float, bool)):
+        if src is None or isinstance(src, (int, long, float, bool)):
             return src
         if isinstance(src, basestring):
             try:
-                dct = yaml.load(src)
+                return yaml.load(src)
             except:
-                raise ValueError("_smart_load: yaml failed to load (%s) '%s'" % (str(type(src)), str(src)))
-        elif isinstance(src, (dict, list)):
-            try:
-                dct = yaml.load(yaml.dump(src))
-            except:
-                raise ValueError("_smart_load: Can not convert to yaml data format: %s" % str(src))
-        else:
-            raise ValueError("_smart_load: Unknown format to yaml: %s (type is %s)" % (str(src), str(type(src))))
-        return dct
+                return yaml.load(src.replace('\/', '/'))
+        if isinstance(src, (dict, list)):
+            return yaml.load(yaml.dump(src))
+        raise ValueError("_smart_load: Unknown format to yaml: %s (type is %s)" % (str(src), str(type(src))))
 
     @staticmethod
     def _tokenize(s):
@@ -106,8 +101,8 @@ class FetchYaml(object):
             if not blocks:
                 logger.debug("_smart_path: Can not get parent list '%s'" % left)
                 return None
-            if not isinstance(blocks, list):
-                raise TypeError("_smart_path: Node is not a list: %s" % left)
+            if not isinstance(blocks, (list, dict)):
+                raise TypeError("_smart_path: Node is not a list or dictionary: %s" % left)
             if len(blocks) == 0:
                 logger.debug("_smart_path: Node is an empty list: %s" % left)
                 return None
@@ -116,13 +111,14 @@ class FetchYaml(object):
                 raise ValueError("_smart_path: expect 'sub-path=value or sub-path~regex' but received '%s'" % locator)
             path, sign, expr = psv
             index = -1
-            for i, block in enumerate(blocks):
+            search_pairs = blocks.iteritems() if isinstance(blocks, dict) else enumerate(blocks)
+            for i, block in search_pairs:
                 v = self._get_tree_by_direct_path(block, self._tokenize(path))
                 logger.debug("_smart_path: get tree/node by sub-path '%s', value:\n'%s'" % (path, str(v)))
                 if not v: continue
                 if not isinstance(v, (basestring, bool, int, long, float)):
                     raise ValueError("_smart_path: expect basic type to index block but received '%s'" % left)
-                index = i
+                index = 1
                 if sign == '~' and re.compile(expr).search(v): break
                 if sign == '=':
                     if isinstance(v, basestring) and unicode(v) == expr: break
@@ -133,11 +129,11 @@ class FetchYaml(object):
                 index = -1
             if index < 0:
                 return None
-            s = '.'.join((left, str(index))) if left else str(index)
+            s = '.'.join((left, str(i))) if left else str(i)
             s = '.'.join((s, right)) if right else s
             logger.debug("_smart_path: '%s' indexed as '%d', new path will be '%s'" % (locator, index, s))
-            sp = re.split('%', s, 2)
-        if len(sp) == 1:
+            sp = re.split('[/%]', s, 2)
+        if len(sp) < 3:
             return self._get_tree_by_direct_path(dct, self._tokenize(s))
         return None
 
