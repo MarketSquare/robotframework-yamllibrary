@@ -62,6 +62,7 @@ class FetchYaml(object):
         if not self.compare_tree(src, dst):
             raise AssertionError("nodes under '%s' do not satisfied matcher:\nactual:\n'%s'\nmatcher:\n'%s'" %
                                  (yml_path, str(src), str(dst)))
+        logger.info("The matcher has been verified passed.")
 
     @staticmethod
     def _smart_load(src):
@@ -88,18 +89,49 @@ class FetchYaml(object):
                 next(tokens)
             yield token
 
+    def _get_tree_by_direct_path(self, dct, key):
+        key = iter(key)
+        try:
+            head = next(key)
+        except StopIteration:
+            return dct
+        if isinstance(dct, (list, tuple)):
+            try:
+                idx = int(head)
+            except ValueError:
+                raise ValueError("_direct_path: list index not a integer: %r" % head)
+            try:
+                value = dct[idx]
+            except IndexError:
+                raise IndexError("_direct_path: list index out of range: %d to %d" % (idx, len(dct)))
+        elif isinstance(dct, dict):
+            try:
+                value = dct[head]
+            except KeyError:
+                raise KeyError("_direct_path: dict misses key %r" % (head, ))
+            except:
+                raise TypeError("_direct_path: can't query leaf key %r with value %r" % (head, dct))
+        else:
+            value = dct
+
+        for ty in (str, unicode, int, long, float, bool):
+            if isinstance(value, ty):
+                return ty(value)
+
+        return self._get_tree_by_direct_path(value, key)
+
     def _get_tree_by_smart_path(self, dct, key):
         if key == '.' or key == '/':
             return dct
         s = key
-        sp = re.split('[%/]', s, 2)  # path_left, middle_locator, path_right
+        sp = re.split('[/]', s, 2)  # path_left, middle_locator, path_right
         while len(sp) == 3:
             left, locator, right = sp
+            logger.debug("_smart_path: path is %s" % s)
             logger.debug("_smart_path: split path to left/middle/right: '%s', '%s', '%s'" % (left, locator, right))
             blocks = self._get_tree_by_direct_path(dct, self._tokenize(left)) if left else dct
-            logger.debug("_smart_path: get tree/node by left path '%s':\n%s" % (left, str(blocks)))
             if not blocks:
-                logger.debug("_smart_path: Can not get parent list '%s'" % left)
+                logger.debug("_smart_path: Can not get the TBD part under path '%s'" % left)
                 return None
             if not isinstance(blocks, (list, dict)):
                 raise TypeError("_smart_path: Node is not a list or dictionary: %s" % left)
@@ -114,7 +146,7 @@ class FetchYaml(object):
             search_pairs = blocks.iteritems() if isinstance(blocks, dict) else enumerate(blocks)
             for i, block in search_pairs:
                 v = self._get_tree_by_direct_path(block, self._tokenize(path))
-                logger.debug("_smart_path: get tree/node by sub-path '%s', value:\n'%s'" % (path, str(v)))
+                logger.debug("_smart_path: get tree/node by sub-path '%s', value: %s" % (path, str(v)))
                 if not v: continue
                 if not isinstance(v, (basestring, bool, int, long, float)):
                     raise ValueError("_smart_path: expect basic type to index block but received '%s'" % left)
@@ -132,7 +164,7 @@ class FetchYaml(object):
             s = '.'.join((left, str(i))) if left else str(i)
             s = '.'.join((s, right)) if right else s
             logger.debug("_smart_path: '%s' indexed as '%d', new path will be '%s'" % (locator, index, s))
-            sp = re.split('[/%]', s, 2)
+            sp = re.split('[/]', s, 2)
         if len(sp) < 3:
             return self._get_tree_by_direct_path(dct, self._tokenize(s))
         return None
@@ -246,34 +278,6 @@ class FetchYaml(object):
         elif isinstance(dst, basestring):
             return self._cmp_string(src, dst)
         logger.debug("Unknown type of dst: %s" % str(dst))
-
-    def _get_tree_by_direct_path(self, dct, key):
-        key = iter(key)
-        try:
-            head = next(key)
-        except StopIteration:
-            return dct
-        if isinstance(dct, list):
-            try:
-                idx = int(head)
-            except ValueError:
-                raise ValueError("_direct_path: list index not a integer: %r." % head)
-            try:
-                value = dct[idx]
-            except IndexError:
-                raise IndexError("_direct_path: list index out of range: %d to %d." % (idx, len(dct)))
-        else:
-            try:
-                value = dct[head]
-            except KeyError:
-                raise KeyError("_direct_path: dict misses key %r." % (head, ))
-            except:
-                raise TypeError("_direct_path: can't query sub-value '%r' of a leaf with value '%r'." % (head, dct))
-        for ty in (int, long, float, bool):
-            if isinstance(value, ty):
-                value = ty(value)
-                break
-        return self._get_tree_by_direct_path(value, key)
 
     def _strip_bson_id(self, dct):
         if isinstance(dct, (list, tuple)):
