@@ -124,7 +124,7 @@ class FetchYaml(object):
         if key == '.' or key == '/':
             return dct
         s = key
-        sp = re.split('[/]', s, 2)  # path_left, middle_locator, path_right
+        sp = re.split('[/%]', s, 2)  # path_left, middle_locator, path_right
         while len(sp) == 3:
             left, locator, right = sp
             logger.debug("_smart_path: path is %s" % s)
@@ -146,7 +146,7 @@ class FetchYaml(object):
             search_pairs = blocks.iteritems() if isinstance(blocks, dict) else enumerate(blocks)
             for i, block in search_pairs:
                 v = self._get_tree_by_direct_path(block, self._tokenize(path))
-                logger.debug("_smart_path: get tree/node by sub-path '%s', value: %s" % (path, str(v)))
+                logger.debug("_smart_path: stepped into branch search path '%s' and got its leaf value: %s" % (path, str(v)))
                 if not v: continue
                 if not isinstance(v, (basestring, bool, int, long, float)):
                     raise ValueError("_smart_path: expect basic type to index block but received '%s'" % left)
@@ -163,8 +163,8 @@ class FetchYaml(object):
                 return None
             s = '.'.join((left, str(i))) if left else str(i)
             s = '.'.join((s, right)) if right else s
-            logger.debug("_smart_path: '%s' indexed as '%d', new path will be '%s'" % (locator, index, s))
-            sp = re.split('[/]', s, 2)
+            logger.debug("_smart_path: '%s' indexed as '%s', new path will be '%s'" % (locator, i, s))
+            sp = re.split('[/%]', s, 2)
         if len(sp) < 3:
             return self._get_tree_by_direct_path(dct, self._tokenize(s))
         return None
