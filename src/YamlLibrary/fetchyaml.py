@@ -10,7 +10,7 @@ class FetchYaml(object):
     it requires string buffer input that can be loaded by yaml.load() function
     """
     def __init__(self):
-        self._mathexpr = re.compile("^[y>=< 0-9]+$")
+        self._mathexpr = re.compile("^[y>=< 0-9\*\/\-\+\.]+$")
 
     def get_tree(self, yml_src, path):
         """travel given 'path' in src to return a sub-tree that may
@@ -226,13 +226,15 @@ class FetchYaml(object):
     @staticmethod
     def _eval_math_expr(src, dst):
         if not isinstance(src, (int, long, float)):
-            logger.debug("_eval_math_expr: receives src non-int/long/float: %s" % str(src))
+            logger.debug("_eval_math_expr: receives src not in int/long/float/bool: %s" % str(src))
             return False
-        for t in (int, long, float):
-            if isinstance(src, t) and eval(str(t(src)).join(dst.split('y'))):
-                return True
-        logger.debug("_eval_math_expr: '%s' not satisfied math expr '%s'" % (str(src), dst))
-        return False
+        ev = eval(str(src).join(dst.split('y')))
+	if not isinstance(ev, bool):
+	    logger.debug("_eval_math_expr: eval return non-bool value")
+	    return False
+	if ev == False:
+            logger.debug("_eval_math_expr: '%s' not satisfied math expr '%s'" % (str(src), dst))
+        return ev
 
     def _cmp_dict(self, src, dst):
         if not isinstance(src, dict):
