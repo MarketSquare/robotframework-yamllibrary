@@ -10,7 +10,7 @@ class FetchYaml(object):
     it requires string buffer input that can be loaded by yaml.load() function
     """
     def __init__(self):
-        self._mathexpr = re.compile("^[y>=< 0-9\*\/\-\+\.]+$")
+        self._mathexpr = re.compile("^[y>=< 0-9\*\/\-\+\.\(\)]+$")
 
     def get_tree(self, yml_src, path):
         """travel given 'path' in src to return a sub-tree that may
