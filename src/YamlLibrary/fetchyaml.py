@@ -10,7 +10,8 @@ class FetchYaml(object):
     it requires string buffer input that can be loaded by yaml.load() function
     """
     def __init__(self):
-        self._mathexpr = re.compile("^[y>=< 0-9\*\/\-\+\.\(\)]+$")
+        #self._mathexpr = re.compile("^[y>=< 0-9\*\/\-\+\.\(\)]+$")
+        self._mathexpr = re.compile("^[=><= 0-9\*\/\-\+\.\(\)]* y [=>< 0-9\*\/\-\+\.\(\)]*$")
 
     def get_tree(self, yml_src, path):
         """travel given 'path' in src to return a sub-tree that may
@@ -229,10 +230,10 @@ class FetchYaml(object):
             logger.debug("_eval_math_expr: receives src not in int/long/float/bool: %s" % str(src))
             return False
         ev = eval(str(src).join(dst.split('y')))
-	if not isinstance(ev, bool):
-	    logger.debug("_eval_math_expr: eval return non-bool value")
-	    return False
-	if ev == False:
+        if not isinstance(ev, bool):
+            logger.debug("_eval_math_expr: eval return non-bool value")
+            return False
+        if ev == False:
             logger.debug("_eval_math_expr: '%s' not satisfied math expr '%s'" % (str(src), dst))
         return ev
 

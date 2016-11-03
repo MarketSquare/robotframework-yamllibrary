@@ -17,29 +17,25 @@
 
 """Setup script for Robot's YamlLibrary distributions"""
 
-import sys
-import os
-from os.path import join, dirname
-from ez_setup import use_setuptools
-from setuptools import setup
+import sys, os
+from distutils.core import setup
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
-use_setuptools()
-execfile(join(dirname(__file__), 'src', 'YamlLibrary', 'version.py'))
+sys.path.insert(0, os.path.join('src', 'YamlLibrary'))
 
+from version import VERSION
 
 def main():
-    setup(name='robotframework-yamllibrary',
-          version=VERSION,
-          description='Yaml utility library for Robot Framework',
-          author='Fred Huang',
-          author_email='divfor@gmail.com',
-          url='https://github.com/divfor/robotframework-yamllibrary',
-          package_dir={'': 'src'},
-          packages=['YamlLibrary'],
-          install_requires=['pyyaml >= 3.0'],
-          include_package_data=True,
+    setup(name         = 'robotframework-yamllibrary',
+          version      = VERSION,
+          description  = 'Yaml utility library for Robot Framework',
+          author       = 'Fred Huang',
+          author_email = 'divfor@gmail.com',
+          url          = 'https://github.com/divfor/robotframework-yamllibrary',
+          package_dir  = { '' : 'src'},
+          packages     = ['YamlLibrary'],
+          install_requires = ["PyYAML >= 3.0"]
           )
+        
 
 if __name__ == "__main__":
     main()
