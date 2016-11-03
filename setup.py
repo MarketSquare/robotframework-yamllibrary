@@ -33,7 +33,7 @@ def main():
           url          = 'https://github.com/divfor/robotframework-yamllibrary',
           package_dir  = { '' : 'src'},
           packages     = ['YamlLibrary'],
-          install_requires = ["PyYAML >= 3.0"]
+          install_requires = ['pyyaml>=3.0'],
           )
         
 
