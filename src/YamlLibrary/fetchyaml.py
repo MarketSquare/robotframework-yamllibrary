@@ -13,7 +13,7 @@ class FetchYaml(object):
         #self._mathexpr = re.compile("^[y>=< 0-9\*\/\-\+\.\(\)]+$")
         self._mathexpr = re.compile("^[=><= 0-9\*\/\-\+\.\(\)]* y [=>< 0-9\*\/\-\+\.\(\)]*$")
 
-    def get_tree(self, yml_src, path):
+    def get_tree(self, yml_src, path='.'):
         """travel given 'path' in src to return a sub-tree that may
          be a single python dictionary, a list of dictionaries, or
          a single node (the value from a key/value pair)
